@@ -1,169 +1,109 @@
-window.addEventListener('DOMContentLoaded', () => {
-  const API_URL = 'https://dragonball-api.com/api/characters';
-  const characterContainer = document.getElementById('characterContainer');
-  const searchInput = document.getElementById('searchInput');
-  const searchButton = document.getElementById('searchButton');
-  const messageDiv = document.getElementById('message');
-  const spinner = document.getElementById('loadingSpinner');
-  const backToTop = document.getElementById('backToTop');
+const buscarInput = document.querySelector('input[placeholder="Buscar personajes"]'); // input de búsqueda
+const btnBuscar = document.querySelector(".btn.btn-warning");
+const btnLimpiar = document.querySelector(".btn.btn-success");
+const contenedorMensajes = document.getElementById("message");
+const contenedorDePersonajes = document.getElementById("Personaje"); 
 
-  let currentPage = 1;
-  let currentQuery = '';
-  let loading = false;
-  let totalPages = Infinity;
+let PersonajesArray = [];
 
-  function mostrarSpinner() {
-    spinner.style.display = 'block';
-  }
-  function ocultarSpinner() {
-    spinner.style.display = 'none';
-  }
-  function clearResults() {
-    characterContainer.innerHTML = '';
-    messageDiv.textContent = '';
-  }
-  function showMessage(msg, isError = true) {
-    messageDiv.textContent = msg;
-    messageDiv.style.color = isError ? 'red' : 'green';
-  }
-  function renderCharacters(characters) {
-    characterContainer.innerHTML = '';
-    if (characters.length === 0 && currentPage === 1) {
-      showMessage('No se encontraron personajes.');
-      return;
-    }
+function LimpiarPersonaje() {
+  contenedorDePersonajes.innerHTML = '';
+  contenedorMensajes.textContent = '';
+}
 
-    characters.forEach(char => {
-      const col = document.createElement('div');
-      col.className = 'col-12 col-md-4 mb-4';
+function showMessage(text) {
+  contenedorMensajes.textContent = text;
+}
 
-      const card = document.createElement('div');
-      card.className = 'card h-100';
-      card.style.background = 'yellow'; // Para depuración visual
-
-      const img = document.createElement('img');
-      img.src = char.image || 'https://via.placeholder.com/150';
-      img.alt = char.name || 'Personaje';
-      img.className = 'card-img-top';
-
-      const cardBody = document.createElement('div');
-      cardBody.className = 'card-body';
-
-      const name = document.createElement('h5');
-      name.className = 'card-title';
-      name.textContent = char.name || 'Nombre desconocido';
-
-      const race = document.createElement('p');
-      race.textContent = `Raza: ${char.race || 'Desconocida'}`;
-
-      const gender = document.createElement('p');
-      gender.textContent = `Género: ${char.gender || 'Desconocido'}`;
-
-      cardBody.appendChild(name);
-      cardBody.appendChild(race);
-      cardBody.appendChild(gender);
-
-      card.appendChild(img);
-      card.appendChild(cardBody);
-      col.appendChild(card);
-      characterContainer.appendChild(col);
-    });
-  }
-
-  async function fetchCharacters(name = '', page = 1) {
-    try {
-      loading = true;
-      mostrarSpinner();
-      showMessage('Cargando...', false);
-
-      let url = `${API_URL}?page=${page}`;
-      if (name) url += `&name=${encodeURIComponent(name)}`;
-
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Error en la respuesta: ${response.status}`);
-
-      const data = await response.json();
-      if (data.meta && data.meta.totalPages) {
-        totalPages = data.meta.totalPages;
-      }
-
-      loading = false;
-      ocultarSpinner();
-      showMessage('', false);
-      return data.data || [];
-    } catch (error) {
-      loading = false;
-      ocultarSpinner();
-      showMessage(`Error al consultar la API: ${error.message}`);
-      console.error('Error al consultar la API:', error);
-      return [];
-    }
-  }
-  
-  characterContainer.innerHTML = `
-  <div class="col-12 col-md-4 mb-4">
-    <div class="card h-100" style="background: yellow;">
-      <img src="https://via.placeholder.com/150" class="card-img-top" alt="Test">
-      <div class="card-body">
-        <h5 class="card-title">Test Personaje</h5>
-        <p>Raza: Saiyan</p>
-        <p>Género: Masculino</p>
+function renderTarjetas(personajes) {
+  contenedorDePersonajes.innerHTML = ''; 
+  personajes.forEach(personaje => {
+    const Tarjeta = document.createElement('div');
+    Tarjeta.classList.add('Tarjeta-Personaje', 'col-12', 'col-md-4', 'd-flex', 'align-items-stretch', 'justify-content-center');
+    Tarjeta.innerHTML = `
+      <div class="card h-100 shadow-lg border-warning border-2">
+        <img src="${personaje.image}" alt="${personaje.name}" class="card-img-top"/>
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h3 class="card-title text-center mb-2" style="font-family: 'Luckiest Guy', cursive; color: #ff9800;">${personaje.name}</h3>
+            <p class="card-text mb-1"><strong>Raza:</strong> ${personaje.race}</p>
+            <p class="card-text mb-3"><strong>Género:</strong> ${personaje.gender}</p>
+          </div>
+          <button class="btn btn-warning mt-auto w-100 ver-detalles-btn" data-id="${personaje.id}">Ver detalles</button>
+        </div>
       </div>
-    </div>
-  </div>
-`;
+    `;
+    contenedorDePersonajes.appendChild(Tarjeta);
+  });
 
-  async function loadCharacters(reset = false) {
-    if (loading) return;
+  document.querySelectorAll('.ver-detalles-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = e.target.getAttribute('data-id');
+      alert('Aquí puedes mostrar detalles del personaje con id: ' + id);
+    });
+  });
+}
 
-    if (reset) {
-      clearResults();
-      currentPage = 1;
-      totalPages = Infinity;
+async function buscarPersonajesByName(name) {
+  try {
+    showMessage(''); 
+    contenedorDePersonajes.innerHTML = ''; 
+    const respuesta = await fetch(`https://dragonball-api.com/api/characters?name=${encodeURIComponent(name)}`);
+    if (!respuesta.ok) {
+      throw new Error(`Error al consultar la API. Código: ${respuesta.status}`);
     }
+    const data = await respuesta.json();
 
-    currentQuery = searchInput.value.trim();
+    // La API puede devolver los personajes en data.items o data
+    const personajes = data.items || data;
+    if (!personajes || personajes.length === 0) {
+      showMessage('No se encontraron personajes con ese nombre.');
+      return;
+    }
+    PersonajesArray = personajes;
+    renderTarjetas(PersonajesArray);
+  } catch (error) {
+    console.error('Error de red o fetch:', error);
+    showMessage('Ocurrió un error al consultar la API. Por favor, intentá de nuevo más tarde.');
+  }
+}
 
-    const characters = await fetchCharacters(currentQuery, currentPage);
-    console.log(characters);
-
-    if (characters.length === 0 && currentPage === 1) {
+// Cargar personajes al inicio (primeros 12)
+async function cargarPersonajesInicio() {
+  LimpiarPersonaje();
+  try {
+    const respuesta = await fetch('https://dragonball-api.com/api/characters?page=1');
+    if (!respuesta.ok) throw new Error();
+    const data = await respuesta.json();
+    const personajes = data.items || data;
+    if (!personajes || personajes.length === 0) {
       showMessage('No se encontraron personajes.');
       return;
     }
-
-    renderCharacters(characters);
+    renderTarjetas(personajes.slice(0, 12)); 
+  } catch {
+    showMessage('Error al cargar personajes.');
   }
+}
 
-  searchButton.addEventListener('click', () => {
-    currentPage = 1;
-    loadCharacters(true);
-  });
 
-  window.addEventListener('scroll', () => {
-    if (loading) return;
-    if (currentPage >= totalPages) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    if (scrollTop + clientHeight >= scrollHeight - 5) {
-      currentPage++;
-      loadCharacters(false);
-    }
-
-    if (scrollTop > 300) {
-      backToTop.style.display = 'block';
-    } else {
-      backToTop.style.display = 'none';
-    }
-  });
-
-  backToTop.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
-  // Inicialización al cargar la página
-  searchInput.value = '';
-  currentPage = 1;
-  totalPages = Infinity;
-  loadCharacters(true);
+btnBuscar.addEventListener('click', (e) => {
+  e.preventDefault();
+  LimpiarPersonaje();
+  const query = buscarInput.value.trim();
+  if (!query) {
+    showMessage('Por favor, ingrese un nombre para buscar.');
+    return;
+  }
+  buscarPersonajesByName(query);
 });
+
+// Evento limpiar
+btnLimpiar.addEventListener('click', () => {
+  buscarInput.value = '';
+  LimpiarPersonaje();
+  cargarPersonajesInicio();
+});
+
+// Cargar personajes al abrir la página
+window.addEventListener('DOMContentLoaded', cargarPersonajesInicio);
