@@ -1,0 +1,30 @@
+body {
+  background: linear-gradient(to right, #ffc0cb, #ffe4e1);
+  font-family: 'Quicksand', sans-serif;
+  color: #4d0039;
+  padding: 20px;
+}
+
+h1 {
+  font-family: 'Rubik Mono One', sans-serif;
+  color: #ff1493;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.search-section {
+  max-width: 500px;
+  margin: 0 auto 40px auto;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-pink {
+  background-color: #ff69b4;
+  color: white;
+}
+
+.btn-pink:hover {
+  background-color: #ff1493;
+}
+
