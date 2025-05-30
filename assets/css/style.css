@@ -1,10 +1,13 @@
+/* Fondo degradado con tonos rosados, bien suave */
 body {
   background: linear-gradient(to right, #ffc0cb, #ffe4e1);
   font-family: 'Quicksand', sans-serif;
   color: #4d0039;
   padding: 20px;
+  margin: 0;
 }
 
+/* Título principal con fuente diferente y color vibrante */
 h1 {
   font-family: 'Rubik Mono One', sans-serif;
   color: #ff1493;
@@ -12,6 +15,7 @@ h1 {
   margin-bottom: 30px;
 }
 
+/* Zona de búsqueda centrada con espacio entre input y botón */
 .search-section {
   max-width: 500px;
   margin: 0 auto 40px auto;
@@ -19,12 +23,16 @@ h1 {
   gap: 10px;
 }
 
+/* Botón con colores rosados bien copados */
 .btn-pink {
   background-color: #ff69b4;
   color: white;
+  border: none;
+  transition: background-color 0.3s ease;
 }
 
 .btn-pink:hover {
   background-color: #ff1493;
+  cursor: pointer;
 }
 
