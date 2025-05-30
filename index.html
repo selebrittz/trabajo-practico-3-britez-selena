@@ -1,30 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dragon Ball Personajes</title>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+  <!-- Header rosado y lindo -->
+  <header class="header-rosado mb-4">
+    <div class="container py-3 d-flex flex-column align-items-center">
+      <h1 class="titulo-header mb-0">Dragon Ball API</h1>
+    </div>
+  </header>
 
-  <div class ="container py-3" >
-     <form class ="form-control me-2 d-flex justify-content-center"> 
-     <input type="text" class="form-control" placeholder="Buscar personajes" aria-label="Buscar Personajes"/>
-      <button class="btn btn-warning" type="submit">Buscar</button>
-      <button class="btn btn-success" type="button">Limpiar</button>
-     </form>
+  <div class="container py-3">
+    <form class="form-control me-2 d-flex justify-content-center mb-4" onsubmit="return false;">
+      <input type="text" id="buscarInput" class="form-control me-2" placeholder="Buscar personajes" aria-label="Buscar Personajes"/>
+      <button id="btnBuscar" class="btn btn-warning me-2" type="button">Buscar</button>
+      <button id="btnLimpiar" class="btn btn-success" type="button">Limpiar</button>
+    </form>
 
+    <!-- Mensaje de error o info -->
     <div id="message" class="message-text"></div>
+
+    <!-- Contenedor para resultados -->
     <div id="Personaje" class="row g-4 justify-content-center"></div>
   </div>
- 
-
-
-<script src="assets/js/script.js"></script>
+  <script src="js/script.js"></script>
+</body>
 </html>
-
-
-

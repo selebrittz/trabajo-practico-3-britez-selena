@@ -1,26 +1,29 @@
-const buscarInput = document.querySelector('input[placeholder="Buscar personajes"]'); // input de búsqueda
-const btnBuscar = document.querySelector(".btn.btn-warning");
-const btnLimpiar = document.querySelector(".btn.btn-success");
+const buscarInput = document.getElementById('buscarInput');
+const btnBuscar = document.getElementById('btnBuscar');
+const btnLimpiar = document.getElementById('btnLimpiar');
 const contenedorMensajes = document.getElementById("message");
-const contenedorDePersonajes = document.getElementById("Personaje"); 
+const contenedorDePersonajes = document.getElementById("Personaje");
 
-let PersonajesArray = [];
+let todosLosPersonajes = [];
 
+// Mostrar mensaje
+function showMessage(text) {
+  contenedorMensajes.textContent = text;
+}
+
+// Limpiar pantalla
 function LimpiarPersonaje() {
   contenedorDePersonajes.innerHTML = '';
   contenedorMensajes.textContent = '';
 }
 
-function showMessage(text) {
-  contenedorMensajes.textContent = text;
-}
-
+// Renderizar tarjetas
 function renderTarjetas(personajes) {
-  contenedorDePersonajes.innerHTML = ''; 
+  contenedorDePersonajes.innerHTML = ''; // limpiar antes de renderizar
   personajes.forEach(personaje => {
-    const Tarjeta = document.createElement('div');
-    Tarjeta.classList.add('Tarjeta-Personaje', 'col-12', 'col-md-4', 'd-flex', 'align-items-stretch', 'justify-content-center');
-    Tarjeta.innerHTML = `
+    const tarjeta = document.createElement('div');
+    tarjeta.classList.add('Tarjeta-Personaje', 'col-12', 'col-md-4', 'd-flex', 'align-items-stretch', 'justify-content-center');
+    tarjeta.innerHTML = `
       <div class="card h-100 shadow-lg border-warning border-2">
         <img src="${personaje.image}" alt="${personaje.name}" class="card-img-top"/>
         <div class="card-body d-flex flex-column justify-content-between">
@@ -33,77 +36,52 @@ function renderTarjetas(personajes) {
         </div>
       </div>
     `;
-    contenedorDePersonajes.appendChild(Tarjeta);
-  });
-
-  document.querySelectorAll('.ver-detalles-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const id = e.target.getAttribute('data-id');
-      alert('Aquí puedes mostrar detalles del personaje con id: ' + id);
-    });
+    contenedorDePersonajes.appendChild(tarjeta);
   });
 }
 
-async function buscarPersonajesByName(name) {
-  try {
-    showMessage(''); 
-    contenedorDePersonajes.innerHTML = ''; 
-    const respuesta = await fetch(`https://dragonball-api.com/api/characters?name=${encodeURIComponent(name)}`);
-    if (!respuesta.ok) {
-      throw new Error(`Error al consultar la API. Código: ${respuesta.status}`);
-    }
-    const data = await respuesta.json();
-
-    // La API puede devolver los personajes en data.items o data
-    const personajes = data.items || data;
-    if (!personajes || personajes.length === 0) {
-      showMessage('No se encontraron personajes con ese nombre.');
-      return;
-    }
-    PersonajesArray = personajes;
-    renderTarjetas(PersonajesArray);
-  } catch (error) {
-    console.error('Error de red o fetch:', error);
-    showMessage('Ocurrió un error al consultar la API. Por favor, intentá de nuevo más tarde.');
-  }
-}
-
-// Cargar personajes al inicio (primeros 12)
+// Obtener todos los personajes al inicio
 async function cargarPersonajesInicio() {
-  LimpiarPersonaje();
   try {
     const respuesta = await fetch('https://dragonball-api.com/api/characters?page=1');
-    if (!respuesta.ok) throw new Error();
     const data = await respuesta.json();
-    const personajes = data.items || data;
-    if (!personajes || personajes.length === 0) {
-      showMessage('No se encontraron personajes.');
-      return;
-    }
-    renderTarjetas(personajes.slice(0, 12)); 
+    todosLosPersonajes = data.items;
+    renderTarjetas(todosLosPersonajes.slice(0, 12)); // Mostrar primeros 12
   } catch {
     showMessage('Error al cargar personajes.');
   }
 }
 
+// Buscar localmente por nombre
+function buscarLocalmente(nombre) {
+  const nombreBuscado = nombre.toLowerCase();
+  const personajesFiltrados = todosLosPersonajes.filter(p =>
+    p.name.toLowerCase().includes(nombreBuscado)
+  );
 
-btnBuscar.addEventListener('click', (e) => {
-  e.preventDefault();
-  LimpiarPersonaje();
-  const query = buscarInput.value.trim();
-  if (!query) {
-    showMessage('Por favor, ingrese un nombre para buscar.');
-    return;
+  if (personajesFiltrados.length === 0) {
+    showMessage("No se encontraron personajes con ese nombre.");
+  } else {
+    renderTarjetas(personajesFiltrados);
   }
-  buscarPersonajesByName(query);
+}
+
+// Eventos
+btnBuscar.addEventListener('click', () => {
+  LimpiarPersonaje();
+  const nombre = buscarInput.value.trim();
+  if (!nombre) {
+    showMessage('Por favor, ingrese un nombre para buscar.');
+  } else {
+    buscarLocalmente(nombre);
+  }
 });
 
-// Evento limpiar
 btnLimpiar.addEventListener('click', () => {
   buscarInput.value = '';
   LimpiarPersonaje();
-  cargarPersonajesInicio();
+  renderTarjetas(todosLosPersonajes.slice(0, 12));
 });
 
-// Cargar personajes al abrir la página
+// Cargar al iniciar
 window.addEventListener('DOMContentLoaded', cargarPersonajesInicio);
